@@ -30,6 +30,23 @@ namespace PuntoVenta.Models
 
         public DateTime? FechaTimbrado { get; set; }
 
+        [MaxLength(10)]
+        public string Serie { get; set; } = "A";
+
+        public int Folio { get; set; }
+
+        [Required]
+        [MaxLength(5)]
+        public string LugarExpedicion { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(3)]
+        public string MetodoPago { get; set; } = "PUE";
+
+        [Required]
+        [MaxLength(2)]
+        public string FormaPago { get; set; } = "03";
+
         [ForeignKey("OrdenId")]
         public virtual Orden Orden { get; set; } = null!;
 

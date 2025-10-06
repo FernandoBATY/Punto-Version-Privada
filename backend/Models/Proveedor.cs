@@ -33,6 +33,12 @@ namespace PuntoVenta.Models
 
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
+        [MaxLength(3)]
+        public string? RegimenFiscal { get; set; }
+
+        [MaxLength(5)]
+        public string? CodigoPostal { get; set; }
+
         public virtual ICollection<Producto> Productos { get; set; } = new List<Producto>();
         public virtual ICollection<Orden> Ordenes { get; set; } = new List<Orden>();
     }

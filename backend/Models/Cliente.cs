@@ -33,6 +33,16 @@ namespace PuntoVenta.Models
 
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
+        [Required]
+        [MaxLength(3)]
+        public string RegimenFiscal { get; set; } = string.Empty;
+
+        [MaxLength(5)]
+        public string? CodigoPostal { get; set; }
+
+        [MaxLength(3)]
+        public string? UsoCFDI { get; set; }
+
         
         public virtual ICollection<Cesta> Cestas { get; set; } = new List<Cesta>();
         public virtual ICollection<Orden> Ordenes { get; set; } = new List<Orden>();

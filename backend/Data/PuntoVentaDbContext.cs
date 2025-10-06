@@ -37,6 +37,9 @@ namespace PuntoVenta.Data
                 entity.Property(e => e.RFC).HasMaxLength(13);
                 entity.Property(e => e.Telefono).HasMaxLength(20);
                 entity.Property(e => e.FechaCreacion).HasDefaultValueSql("SYSUTCDATETIME()");
+                entity.Property(e => e.RegimenFiscal).IsRequired().HasMaxLength(3);
+                entity.Property(e => e.CodigoPostal).HasMaxLength(5);
+                entity.Property(e => e.UsoCFDI).HasMaxLength(3);
                 entity.HasIndex(e => e.Correo).IsUnique();
             });
 
@@ -50,6 +53,8 @@ namespace PuntoVenta.Data
                 entity.Property(e => e.RFC).HasMaxLength(13);
                 entity.Property(e => e.Telefono).HasMaxLength(20);
                 entity.Property(e => e.FechaCreacion).HasDefaultValueSql("SYSUTCDATETIME()");
+                entity.Property(e => e.RegimenFiscal).HasMaxLength(3);
+                entity.Property(e => e.CodigoPostal).HasMaxLength(5);
                 entity.HasIndex(e => e.Correo).IsUnique();
             });
 
@@ -199,6 +204,11 @@ namespace PuntoVenta.Data
                 entity.Property(e => e.UUID).IsRequired().HasMaxLength(36);
                 entity.Property(e => e.Total).HasColumnType("decimal(12,2)");
                 entity.Property(e => e.FechaEmision).HasDefaultValueSql("SYSUTCDATETIME()");
+                entity.Property(e => e.Serie).HasMaxLength(10).HasDefaultValue("A");
+                entity.Property(e => e.Folio).IsRequired();
+                entity.Property(e => e.LugarExpedicion).IsRequired().HasMaxLength(5);
+                entity.Property(e => e.MetodoPago).IsRequired().HasMaxLength(3).HasDefaultValue("PUE");
+                entity.Property(e => e.FormaPago).IsRequired().HasMaxLength(2).HasDefaultValue("03");
 
                 entity.HasOne(d => d.Orden)
                     .WithOne(p => p.Factura)

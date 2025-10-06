@@ -6,9 +6,11 @@ CREATE TABLE Clientes (
     Apellido NVARCHAR(100) NOT NULL,
     RFC NVARCHAR(13) NULL,
     Telefono NVARCHAR(20) NULL,
-    FechaCreacion DATETIME2(3) DEFAULT SYSUTCDATETIME()
+    FechaCreacion DATETIME2(3) DEFAULT SYSUTCDATETIME(),
+    RegimenFiscal NVARCHAR(3) NOT NULL,
+    CodigoPostal NVARCHAR(5),
+    UsoCFDI NVARCHAR(3)
 );
-
 CREATE TABLE Proveedores (
     ProveedorId INT IDENTITY(1,1) PRIMARY KEY,
     Correo NVARCHAR(255) NOT NULL UNIQUE,
@@ -17,7 +19,9 @@ CREATE TABLE Proveedores (
     Apellido NVARCHAR(100) NOT NULL,
     RFC NVARCHAR(13) NULL,
     Telefono NVARCHAR(20) NULL,
-    FechaCreacion DATETIME2(3) DEFAULT SYSUTCDATETIME()
+    FechaCreacion DATETIME2(3) DEFAULT SYSUTCDATETIME(),
+    RegimenFiscal NVARCHAR(3),
+    CodigoPostal NVARCHAR(5)
 );
 
 CREATE TABLE Categorias (
@@ -25,13 +29,10 @@ CREATE TABLE Categorias (
     Nombre NVARCHAR(100) NOT NULL UNIQUE,
     Descripcion NVARCHAR(500) NULL
 );
-
 CREATE TABLE TiposProducto (
     TipoProductoId INT IDENTITY(1,1) PRIMARY KEY,
     Nombre NVARCHAR(100) NOT NULL UNIQUE
 );
-
-
 CREATE TABLE Productos (
     ProductoId INT IDENTITY(1,1) PRIMARY KEY,
     ProveedorId INT NOT NULL REFERENCES Proveedores(ProveedorId),
@@ -45,14 +46,12 @@ CREATE TABLE Productos (
     FechaCreacion DATETIME2(3) DEFAULT SYSUTCDATETIME()
 );
 
-
 CREATE TABLE ImagenesProducto (
     ImagenId INT IDENTITY(1,1) PRIMARY KEY,
     ProductoId INT NOT NULL REFERENCES Productos(ProductoId) ON DELETE CASCADE,
     Url NVARCHAR(1000) NOT NULL,
     Orden INT NOT NULL DEFAULT 0
 );
-
 
 CREATE TABLE Cestas (
     CestaId INT IDENTITY(1,1) PRIMARY KEY,
@@ -106,10 +105,14 @@ CREATE TABLE Facturas (
     UUID CHAR(36) NOT NULL,
     FechaEmision DATETIME2(3) DEFAULT SYSUTCDATETIME(),
     Total DECIMAL(12,2) NOT NULL,
-    FacturaXML NVARCHAR(MAX) NULL
-    FechaTimbrado DATETIME2(3) NULL
+    FacturaXML NVARCHAR(MAX) NULL,
+    FechaTimbrado DATETIME2(3) NULL,
+    Serie NVARCHAR(10) DEFAULT 'A',
+    Folio INT NOT NULL IDENTITY(1,1),
+    LugarExpedicion NVARCHAR(5) NOT NULL,
+    MetodoPago CHAR(3) NOT NULL DEFAULT 'PUE',
+    FormaPago CHAR(2) NOT NULL DEFAULT '03';
 );
-
 CREATE TABLE ItemsFactura (
     ItemFacturaId INT IDENTITY(1,1) PRIMARY KEY,
     FacturaId INT NOT NULL REFERENCES Facturas(FacturaId) ON DELETE CASCADE,
