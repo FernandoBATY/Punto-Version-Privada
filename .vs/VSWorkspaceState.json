@@ -2,8 +2,14 @@
   "ExpandedNodes": [
     "",
     "\\backend",
-    "\\frontend"
+    "\\backend\\Controllers",
+    "\\backend\\Data",
+    "\\backend\\Models",
+    "\\frontend",
+    "\\frontend\\src",
+    "\\frontend\\src\\pages",
+    "\\frontend\\src\\services"
   ],
-  "SelectedNode": "\\backend",
+  "SelectedNode": "\\frontend\\src\\pages\\ProveedorLogin.jsx",
   "PreviewInSolutionExplorer": false
 }

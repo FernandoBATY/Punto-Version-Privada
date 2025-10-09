@@ -4,6 +4,7 @@ using PuntoVenta.Data;
 using DinkToPdf;
 using DinkToPdf.Contracts;
 using Microsoft.Extensions.FileProviders;
+using PuntoVenta.Services;  // ← AGREGAR ESTA LÍNEA
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,13 @@ builder.Services.AddDbContext<PuntoVentaDbContext>(options =>
 
 // Add DinkToPdf service
 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+
+// Configurar EmailSettings desde appsettings.json
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+// Registrar servicio de email
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 
 var app = builder.Build();
 

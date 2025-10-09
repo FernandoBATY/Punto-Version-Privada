@@ -38,3 +38,4 @@ namespace PuntoVenta.Models
         public virtual Factura? Factura { get; set; }
     }
 }
+

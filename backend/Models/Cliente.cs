@@ -48,3 +48,4 @@ namespace PuntoVenta.Models
         public virtual ICollection<Orden> Ordenes { get; set; } = new List<Orden>();
     }
 }
+

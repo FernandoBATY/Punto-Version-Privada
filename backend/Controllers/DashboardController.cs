@@ -12,6 +12,9 @@ namespace PuntoVenta.Controllers
         private readonly PuntoVentaDbContext _context;
         private readonly ILogger<DashboardController> _logger;
 
+        // Definir umbral de stock bajo (puedes ajustarlo según tus necesidades)
+        private const int STOCK_BAJO_UMBRAL = 10;
+
         public DashboardController(PuntoVentaDbContext context, ILogger<DashboardController> logger)
         {
             _context = context;
@@ -23,45 +26,96 @@ namespace PuntoVenta.Controllers
         {
             try
             {
+                _logger.LogInformation("Obteniendo dashboard para proveedor {ProveedorId}", proveedorId);
+
                 // Verificar que el proveedor existe
                 var proveedor = await _context.Proveedores.FindAsync(proveedorId);
                 if (proveedor == null)
                 {
-                    return NotFound(new { message = "Proveedor no encontrado" });
+                    _logger.LogWarning("Proveedor {ProveedorId} no encontrado", proveedorId);
+                    return NotFound(new { success = false, message = "Proveedor no encontrado" });
                 }
 
-                // Estadísticas de productos
+                // ============================================
+                // ESTADÍSTICAS DE PRODUCTOS (COMPLETAS)
+                // ============================================
+
                 var totalProductos = await _context.Productos
                     .Where(p => p.ProveedorId == proveedorId)
                     .CountAsync();
+
+                _logger.LogInformation("Total productos: {Total}", totalProductos);
 
                 var productosActivos = await _context.Productos
                     .Where(p => p.ProveedorId == proveedorId && p.Activo)
                     .CountAsync();
 
+                _logger.LogInformation("Productos activos: {Activos}", productosActivos);
+
+                // ✅ AGREGADO: Productos inactivos
+                var productosInactivos = await _context.Productos
+                    .Where(p => p.ProveedorId == proveedorId && !p.Activo)
+                    .CountAsync();
+
+                _logger.LogInformation("Productos inactivos: {Inactivos}", productosInactivos);
+
                 var productosSinStock = await _context.Productos
                     .Where(p => p.ProveedorId == proveedorId && p.Stock == 0)
                     .CountAsync();
 
-                // Estadísticas de ventas
+                _logger.LogInformation("Productos sin stock: {SinStock}", productosSinStock);
+
+                // ✅ AGREGADO: Productos con bajo stock (entre 1 y el umbral definido)
+                var productosBajoStock = await _context.Productos
+                    .Where(p => p.ProveedorId == proveedorId &&
+                               p.Stock > 0 &&
+                               p.Stock <= STOCK_BAJO_UMBRAL)
+                    .CountAsync();
+
+                _logger.LogInformation("Productos bajo stock: {BajoStock}", productosBajoStock);
+
+                // ✅ AGREGADO: Total de categorías únicas usadas por los productos del proveedor
+                // Como Categoria no tiene ProveedorId, contamos las categorías distintas
+                // que están siendo usadas por los productos de este proveedor
+                var totalCategorias = await _context.Productos
+                    .Where(p => p.ProveedorId == proveedorId && p.CategoriaId != null)
+                    .Select(p => p.CategoriaId)
+                    .Distinct()
+                    .CountAsync();
+
+                _logger.LogInformation("Total categorías: {Categorias}", totalCategorias);
+
+                // ============================================
+                // ESTADÍSTICAS DE VENTAS
+                // ============================================
+
                 // Evitar null en SUM cuando no hay filas
                 var totalVentas = await _context.Ordenes
                     .Where(o => o.ProveedorId == proveedorId && o.EstadoOrden == "Pagado")
                     .SumAsync(o => (decimal?)o.Total) ?? 0m;
 
+                _logger.LogInformation("Total ventas: {Ventas}", totalVentas);
+
                 var totalOrdenes = await _context.Ordenes
                     .Where(o => o.ProveedorId == proveedorId)
                     .CountAsync();
+
+                _logger.LogInformation("Total órdenes: {Ordenes}", totalOrdenes);
 
                 var ordenesPagadas = await _context.Ordenes
                     .Where(o => o.ProveedorId == proveedorId && o.EstadoOrden == "Pagado")
                     .CountAsync();
 
-                // Ventas por mes (últimos 6 meses)
+                _logger.LogInformation("Órdenes pagadas: {Pagadas}", ordenesPagadas);
+
+                // ============================================
+                // VENTAS POR MES (últimos 6 meses)
+                // ============================================
+
                 var fechaInicio = DateTime.UtcNow.AddMonths(-6);
                 var ventasPorMes = await _context.Ordenes
-                    .Where(o => o.ProveedorId == proveedorId && 
-                               o.EstadoOrden == "Pagado" && 
+                    .Where(o => o.ProveedorId == proveedorId &&
+                               o.EstadoOrden == "Pagado" &&
                                o.FechaCreacion >= fechaInicio)
                     .GroupBy(o => new { o.FechaCreacion.Year, o.FechaCreacion.Month })
                     .Select(g => new VentasPorMes
@@ -75,7 +129,10 @@ namespace PuntoVenta.Controllers
                     .ThenBy(v => v.Mes)
                     .ToListAsync();
 
-                // Productos más vendidos
+                // ============================================
+                // PRODUCTOS MÁS VENDIDOS
+                // ============================================
+
                 var productosMasVendidos = await _context.ItemsOrden
                     .Include(i => i.Producto)
                     .Where(i => i.Orden.ProveedorId == proveedorId && i.Orden.EstadoOrden == "Pagado")
@@ -85,14 +142,16 @@ namespace PuntoVenta.Controllers
                         ProductoId = g.Key,
                         Nombre = g.First().Producto.Nombre,
                         CantidadVendida = g.Sum(i => i.Cantidad),
-                        // No usar Subtotal (NotMapped). Calcular en SQL.
                         TotalVentas = g.Sum(i => i.Cantidad * i.PrecioUnitario)
                     })
                     .OrderByDescending(p => p.CantidadVendida)
                     .Take(10)
                     .ToListAsync();
 
-                // Estados de órdenes
+                // ============================================
+                // ESTADOS DE ÓRDENES
+                // ============================================
+
                 var estadosOrdenes = await _context.Ordenes
                     .Where(o => o.ProveedorId == proveedorId)
                     .GroupBy(o => o.EstadoOrden)
@@ -103,6 +162,10 @@ namespace PuntoVenta.Controllers
                     })
                     .ToListAsync();
 
+                // ============================================
+                // CONSTRUIR RESPUESTA COMPLETA
+                // ============================================
+
                 var response = new DashboardProveedorResponse
                 {
                     ProveedorId = proveedorId,
@@ -111,7 +174,10 @@ namespace PuntoVenta.Controllers
                     {
                         TotalProductos = totalProductos,
                         ProductosActivos = productosActivos,
-                        ProductosSinStock = productosSinStock
+                        ProductosInactivos = productosInactivos,      // ✅ NUEVO
+                        ProductosSinStock = productosSinStock,
+                        ProductosBajoStock = productosBajoStock,      // ✅ NUEVO
+                        TotalCategorias = totalCategorias             // ✅ NUEVO
                     },
                     EstadisticasVentas = new EstadisticasVentas
                     {
@@ -125,12 +191,14 @@ namespace PuntoVenta.Controllers
                     EstadosOrdenes = estadosOrdenes
                 };
 
+                _logger.LogInformation("Dashboard generado exitosamente para proveedor {ProveedorId}", proveedorId);
+
                 return Ok(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener dashboard del proveedor {ProveedorId}", proveedorId);
-                return StatusCode(500, new { message = "Error interno del servidor" });
+                return StatusCode(500, new { success = false, message = "Error interno del servidor", error = ex.Message });
             }
         }
 
@@ -153,11 +221,9 @@ namespace PuntoVenta.Controllers
                         FechaCreacion = p.FechaCreacion,
                         Categoria = p.Categoria != null ? p.Categoria.Nombre : "Sin categoría",
                         TipoProducto = p.TipoProducto != null ? p.TipoProducto.Nombre : "Sin tipo",
-                        // Coalesce a 0 cuando no hay ventas
                         CantidadVendida = _context.ItemsOrden
                             .Where(i => i.ProductoId == p.ProductoId && i.Orden.EstadoOrden == "Pagado")
                             .Sum(i => (int?)i.Cantidad) ?? 0,
-                        // Calcular subtotal en SQL para evitar NotMapped
                         TotalVentas = _context.ItemsOrden
                             .Where(i => i.ProductoId == p.ProductoId && i.Orden.EstadoOrden == "Pagado")
                             .Sum(i => (decimal?)(i.Cantidad * i.PrecioUnitario)) ?? 0m
@@ -170,7 +236,7 @@ namespace PuntoVenta.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener productos del dashboard para proveedor {ProveedorId}", proveedorId);
-                return StatusCode(500, new { message = "Error interno del servidor" });
+                return StatusCode(500, new { success = false, message = "Error interno del servidor" });
             }
         }
 
@@ -209,12 +275,15 @@ namespace PuntoVenta.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener órdenes del dashboard para proveedor {ProveedorId}", proveedorId);
-                return StatusCode(500, new { message = "Error interno del servidor" });
+                return StatusCode(500, new { success = false, message = "Error interno del servidor" });
             }
         }
     }
 
-    // DTOs
+    // ============================================
+    // DTOs (Data Transfer Objects)
+    // ============================================
+
     public class DashboardProveedorResponse
     {
         public int ProveedorId { get; set; }
@@ -230,7 +299,10 @@ namespace PuntoVenta.Controllers
     {
         public int TotalProductos { get; set; }
         public int ProductosActivos { get; set; }
+        public int ProductosInactivos { get; set; }      // ✅ AGREGADO
         public int ProductosSinStock { get; set; }
+        public int ProductosBajoStock { get; set; }      // ✅ AGREGADO
+        public int TotalCategorias { get; set; }         // ✅ AGREGADO
     }
 
     public class EstadisticasVentas
@@ -296,4 +368,3 @@ namespace PuntoVenta.Controllers
         public decimal PrecioUnitario { get; set; }
     }
 }
-
