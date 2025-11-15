@@ -78,7 +78,7 @@ const ProductosView = () => {
 
     const handleAddToCart = async (producto) => {
         if (!cliente) {
-            alert('Debes iniciar sesión para agregar productos al carrito');
+            alert('Debes iniciar sesión para agregar productos a la cesta');
             navigate(`/e/${encryptRoute('/login/cliente')}`);
             return;
         }
@@ -90,9 +90,9 @@ const ProductosView = () => {
                 cantidad: 1,
                 precioUnitario: producto.precio
             });
-            alert('Producto agregado al carrito');
+            alert('Producto agregado a la cesta');
         } catch (err) {
-            alert('Error al agregar producto al carrito');
+            alert('Error al agregar producto a la cesta');
         }
     };
 
@@ -363,7 +363,7 @@ const ProductosView = () => {
                                     className="btn btn-add-cart"
                                     disabled={producto.stock === 0}
                                 >
-                                    🛒 Agregar al carrito
+                                    🛒 Agregar a la cesta
                                 </button>
                             </div>
                         ))
@@ -493,7 +493,7 @@ const ProductosView = () => {
                                     className="btn btn-add-cart modal-add-btn"
                                     disabled={selectedProducto.stock === 0}
                                 >
-                                    🛒 Agregar al carrito
+                                    🛒 Agregar ala cesta
                                 </button>
                             </div>
                         </div>
