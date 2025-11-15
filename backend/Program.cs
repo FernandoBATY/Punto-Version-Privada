@@ -1,8 +1,6 @@
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Data;
-using DinkToPdf;
-using DinkToPdf.Contracts;
 using Microsoft.Extensions.FileProviders;
 using PuntoVenta.Services;  // ← AGREGAR ESTA LÍNEA
 
@@ -28,8 +26,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<PuntoVentaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add DinkToPdf service
-builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
 // Configurar EmailSettings desde appsettings.json
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));

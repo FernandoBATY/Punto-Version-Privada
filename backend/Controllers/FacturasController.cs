@@ -365,7 +365,6 @@ namespace PuntoVenta.Controllers
                     page.Size(PageSizes.A4);
                     page.Margin(1.5f, Unit.Centimetre);
                     page.DefaultTextStyle(x => x.FontSize(11).FontColor("#000000"));
-                    page.Background("#f5f5f5");
 
                     page.Content()
                         .PaddingVertical(0.5f, Unit.Centimetre)

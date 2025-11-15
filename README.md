@@ -20,11 +20,8 @@ cd backend
 dotnet restore
 ```
 
-### 3. Configurar la base de datos:
-```bash
-cd backend
-dotnet ef database update
-```
+### 3. Crear la base de datos:
+Abre **SQL Server Management Studio** y ejecuta el archivo `basedatos.sql` (ubicado en la raíz del proyecto) para crear todas las tablas y restricciones necesarias.
 
 ## Ejecución
 
@@ -38,38 +35,11 @@ Esto iniciará:
 - Frontend en http://localhost:3000
 - Swagger UI en http://localhost:5028/swagger/index.html
 
-## Migraciones de Base de Datos
-
-### Aplicar migraciones existentes:
-```bash
-cd backend
-dotnet ef database update
-```
-
-### Crear nueva migración:
-```bash
-cd backend
-dotnet ef migrations add NombreDeLaMigracion
-```
-
-### Revertir migración:
-```bash
-cd backend
-dotnet ef database update NombreMigracionAnterior
-```
-
-### Eliminar última migración (sin aplicar):
-```bash
-cd backend
-dotnet ef migrations remove
-```
-
 ## Estructura del Proyecto
 
 - `frontend/` - Aplicación React
 - `backend/` - API .NET Core
-- `basedatos.sql` - Script de creación de base de datos
-- `backend/Migrations/` - Migraciones de Entity Framework
+- `basedatos.sql` - Script de creación de base de datos (ejecutar en SQL Server)
 
 ## Funcionalidades
 
