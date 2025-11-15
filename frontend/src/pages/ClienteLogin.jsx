@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { encryptRoute } from '../utils/routeCipher';
 import { authAPI } from '../services/api';
+import { sha256Base64 } from '../utils/hash';
+import { onlyLetters, onlyNumbers, onlyAlphanumeric, validateEmail } from '../utils/validators';
 import './Auth.css';
 
 const ClienteLogin = () => {
@@ -24,27 +27,27 @@ const ClienteLogin = () => {
         const { name, value } = e.target;
         let processedValue = value;
 
-        // Validaciones según el campo
+        // Aplicar validadores según el tipo de campo
         switch (name) {
             case 'nombre':
             case 'apellido':
-                // Solo letras y espacios
-                processedValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                // Solo letras y espacios (máx 100)
+                processedValue = onlyLetters(value, 100);
                 break;
 
             case 'telefono':
-                // Solo números, máximo 10 dígitos
-                processedValue = value.replace(/\D/g, '').slice(0, 10);
+                // Solo números (máx 10)
+                processedValue = onlyNumbers(value, 10);
                 break;
 
             case 'rfc':
-                // Solo letras y números, convertir a mayúsculas, máximo 13 caracteres
-                processedValue = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 13);
+                // Solo letras y números, mayúsculas (máx 13)
+                processedValue = onlyAlphanumeric(value, 13).toUpperCase();
                 break;
 
             case 'codigoPostal':
-                // Solo números, máximo 5 dígitos
-                processedValue = value.replace(/\D/g, '').slice(0, 5);
+                // Solo números (máx 5)
+                processedValue = onlyNumbers(value, 5);
                 break;
 
             default:
@@ -58,40 +61,53 @@ const ClienteLogin = () => {
     };
 
     const validateForm = () => {
+        // Validar correo (siempre requerido)
+        if (!formData.correo.trim()) {
+            setError('El correo es requerido');
+            return false;
+        }
+        if (!validateEmail(formData.correo)) {
+            setError('El formato del correo no es válido');
+            return false;
+        }
+
+        // Validar contraseña (siempre requerida)
+        if (!formData.contrasena) {
+            setError('La contraseña es requerida');
+            return false;
+        }
+
         if (!isLogin) {
-            // Validar nombre
+            // En registro, validar campos adicionales obligatorios
             if (formData.nombre.trim().length < 2) {
                 setError('El nombre debe tener al menos 2 caracteres');
                 return false;
             }
 
-            // Validar apellido
             if (formData.apellido.trim().length < 2) {
                 setError('El apellido debe tener al menos 2 caracteres');
                 return false;
             }
 
-            // Validar teléfono (si se proporciona)
+            // Teléfono: si se proporciona, debe tener exactamente 10 dígitos
             if (formData.telefono && formData.telefono.length !== 10) {
                 setError('El teléfono debe tener exactamente 10 dígitos');
                 return false;
             }
 
-            // Validar RFC (si se proporciona)
-            if (formData.rfc) {
-                if (formData.rfc.length < 12 || formData.rfc.length > 13) {
-                    setError('El RFC debe tener 12 o 13 caracteres');
-                    return false;
-                }
+            // RFC: si se proporciona, debe tener 12 o 13 caracteres
+            if (formData.rfc && (formData.rfc.length < 12 || formData.rfc.length > 13)) {
+                setError('El RFC debe tener 12 o 13 caracteres');
+                return false;
             }
 
-            // Validar código postal (si se proporciona)
+            // Código postal: si se proporciona, debe tener exactamente 5 dígitos
             if (formData.codigoPostal && formData.codigoPostal.length !== 5) {
                 setError('El código postal debe tener exactamente 5 dígitos');
                 return false;
             }
 
-            // Validar régimen fiscal
+            // Régimen fiscal obligatorio en registro
             if (!formData.regimenFiscal) {
                 setError('Debes seleccionar un régimen fiscal');
                 return false;
@@ -113,13 +129,15 @@ const ClienteLogin = () => {
         }
 
         try {
+            // Hash contraseña en cliente para que no aparezca en texto plano en Network
+            const hashed = await sha256Base64(formData.contrasena || '');
             let resp;
             if (isLogin) {
-                resp = await authAPI.clienteLogin({ correo: formData.correo, contrasena: formData.contrasena });
+                resp = await authAPI.clienteLogin({ correo: formData.correo, contrasena: hashed });
             } else {
                 resp = await authAPI.clienteRegistro({
                     correo: formData.correo,
-                    contrasena: formData.contrasena,
+                    contrasena: hashed,
                     nombre: formData.nombre.trim(),
                     apellido: formData.apellido.trim(),
                     telefono: formData.telefono || null,
@@ -132,7 +150,7 @@ const ClienteLogin = () => {
 
             if (resp.success) {
                 localStorage.setItem('cliente', JSON.stringify(resp.data));
-                navigate('/productos');
+                navigate(`/e/${encryptRoute('/productos')}`);
             } else {
                 setError(resp.message || 'Error en la operación');
             }
@@ -334,7 +352,7 @@ const ClienteLogin = () => {
                             {isLogin ? 'Regístrate' : 'Inicia sesión'}
                         </button>
                     </p>
-                    <Link to="/" className="back-link">← Volver al inicio</Link>
+                    <Link to={`/e/${encryptRoute('/')}`} className="back-link">← Volver al inicio</Link>
                 </div>
             </div>
         </div>

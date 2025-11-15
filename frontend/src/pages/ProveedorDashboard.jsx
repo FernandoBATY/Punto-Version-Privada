@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { encryptRoute } from '../utils/routeCipher';
 import { dashboardAPI } from '../services/api';
 import {
     BarChart, Bar, PieChart, Pie, LineChart, Line,
@@ -19,14 +20,14 @@ const ProveedorDashboard = () => {
         try {
             const proveedorData = localStorage.getItem('proveedor');
             if (!proveedorData) {
-                navigate('/login/proveedor');
+                navigate(`/e/${encryptRoute('/login/proveedor')}`);
                 return;
             }
 
             const parsedProveedor = JSON.parse(proveedorData);
             if (!parsedProveedor || !parsedProveedor.proveedorId) {
                 localStorage.removeItem('proveedor');
-                navigate('/login/proveedor');
+                navigate(`/e/${encryptRoute('/login/proveedor')}`);
                 return;
             }
 
@@ -35,7 +36,7 @@ const ProveedorDashboard = () => {
         } catch (error) {
             console.error('Error parsing proveedor data:', error);
             localStorage.removeItem('proveedor');
-            navigate('/login/proveedor');
+            navigate(`/e/${encryptRoute('/login/proveedor')}`);
         }
     }, [navigate]);
 
@@ -65,7 +66,7 @@ const ProveedorDashboard = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('proveedor');
-        navigate('/');
+        navigate(`/e/${encryptRoute('/')}`);
     };
 
     const scrollToTop = () => {
@@ -170,7 +171,7 @@ const ProveedorDashboard = () => {
             <header className="dashboard-header">
                 <div className="header-content">
                     <div className="header-left">
-                        <Link to="/" className="logo">POS-ting</Link>
+                        <Link to={`/e/${encryptRoute('/')}`} className="logo">POS-ting</Link>
                     </div>
 
                     <div className="header-actions">
@@ -198,13 +199,13 @@ const ProveedorDashboard = () => {
 
                 {/* Tarjetas de Navegación Rápida */}
                 <div className="dashboard-nav">
-                    <Link to="/proveedor/productos" className="nav-card">
+                    <Link to={`/e/${encryptRoute('/proveedor/productos')}`} className="nav-card">
                         <div className="nav-icon">📦</div>
                         <h3>Gestionar Productos</h3>
                         <p>Agregar, editar y eliminar productos de tu inventario</p>
                     </Link>
 
-                    <Link to="/proveedor/categorias" className="nav-card">
+                    <Link to={`/e/${encryptRoute('/proveedor/categorias')}`} className="nav-card">
                         <div className="nav-icon">🏷️</div>
                         <h3>Gestionar Categorías</h3>
                         <p>Administrar y organizar categorías de productos</p>
@@ -445,7 +446,7 @@ const ProveedorDashboard = () => {
                         <h3 className="footer-title">Enlaces Rápidos</h3>
                         <ul className="footer-links">
                             <li><button onClick={scrollToTop} className="footer-link">Inicio</button></li>
-                            <li><Link to="/productos" className="footer-link">Menú</Link></li>
+                            <li><Link to={`/e/${encryptRoute('/productos')}`} className="footer-link">Menú</Link></li>
                         </ul>
                     </div>
 

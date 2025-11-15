@@ -17,6 +17,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:prod": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
+    "obfuscate": "javascript-obfuscator build/static --output build/static --compact true --control-flow-flattening true --rename-globals true",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start:all": "concurrently \"cd ../backend && dotnet run\" \"npm start\" \"npm run open:swagger\"",
@@ -42,6 +44,8 @@
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "open": "^10.2.0"
+    "javascript-obfuscator": "^4.1.1",
+    "open": "^10.2.0",
+    "cross-env": "^7.0.3"
   }
 }

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { encryptRoute } from '../utils/routeCipher';
 import { authAPI } from '../services/api';
+import { sha256Base64 } from '../utils/hash';
+import { onlyLetters, onlyNumbers, onlyAlphanumeric } from '../utils/validators';
 import './ProveedorLogin.css';
 
 const ProveedorLogin = () => {
@@ -41,7 +44,6 @@ const ProveedorLogin = () => {
         }
 
         const hasAt = email.includes('@');
-        const hasDot = email.includes('.');
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!hasAt) {
@@ -139,27 +141,27 @@ const ProveedorLogin = () => {
         const { name, value } = e.target;
         let processedValue = value;
 
-        // Validaciones según el campo
+        // Aplicar validadores según el tipo de campo
         switch (name) {
             case 'nombre':
             case 'apellido':
-                // Solo letras y espacios
-                processedValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                // Solo letras y espacios (máx 100)
+                processedValue = onlyLetters(value, 100);
                 break;
 
             case 'telefono':
-                // Solo números, máximo 10 dígitos
-                processedValue = value.replace(/\D/g, '').slice(0, 10);
+                // Solo números (máx 10)
+                processedValue = onlyNumbers(value, 10);
                 break;
 
             case 'rfc':
-                // Solo letras y números, convertir a mayúsculas, máximo 13 caracteres
-                processedValue = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 13);
+                // Solo letras y números, mayúsculas (máx 13)
+                processedValue = onlyAlphanumeric(value, 13).toUpperCase();
                 break;
 
             case 'codigoPostal':
-                // Solo números, máximo 5 dígitos
-                processedValue = value.replace(/\D/g, '').slice(0, 5);
+                // Solo números (máx 5)
+                processedValue = onlyNumbers(value, 5);
                 break;
 
             default:
@@ -171,55 +173,65 @@ const ProveedorLogin = () => {
             [name]: processedValue
         });
 
-        // Validar en tiempo real
+        // Validar en tiempo real para correo y contraseña
         if (name === 'correo') {
             const emailValidation = validateEmail(processedValue);
             setValidation(prev => ({
                 ...prev,
-                correo: emailValidation
-            }));
-        }
-
-        if (name === 'contrasena') {
-            const passwordValidation = validatePassword(processedValue);
-            setValidation(prev => ({
-                ...prev,
-                contrasena: passwordValidation
+                correo: { isValid: emailValidation, message: emailValidation ? '✓ Correo válido' : 'Formato de correo inválido' }
             }));
         }
     };
 
     const validateForm = () => {
+        // Validar correo en todos los casos (login y registro)
+        const emailValid = validateEmail(formData.correo);
+        if (!emailValid) {
+            setError('Por favor ingresa un correo válido');
+            return false;
+        }
+
+        // Validar contraseña en todos los casos (login y registro)
+        if (!formData.contrasena || formData.contrasena.trim().length === 0) {
+            setError('La contraseña es obligatoria');
+            return false;
+        }
+
         if (!isLogin) {
+            // REGISTRO: Validaciones adicionales
             // Validar nombre
-            if (formData.nombre.trim().length < 2) {
+            if (!formData.nombre || formData.nombre.trim().length < 2) {
                 setError('El nombre debe tener al menos 2 caracteres');
                 return false;
             }
 
             // Validar apellido
-            if (formData.apellido.trim().length < 2) {
+            if (!formData.apellido || formData.apellido.trim().length < 2) {
                 setError('El apellido debe tener al menos 2 caracteres');
                 return false;
             }
 
-            // Validar teléfono (si se proporciona)
-            if (formData.telefono && formData.telefono.length !== 10) {
+            // Validar teléfono (requerido en registro)
+            if (!formData.telefono || formData.telefono.length !== 10) {
                 setError('El teléfono debe tener exactamente 10 dígitos');
                 return false;
             }
 
-            // Validar RFC (si se proporciona)
-            if (formData.rfc) {
-                if (formData.rfc.length < 12 || formData.rfc.length > 13) {
-                    setError('El RFC debe tener 12 o 13 caracteres');
-                    return false;
-                }
+            // Validar RFC (requerido en registro)
+            if (!formData.rfc || (formData.rfc.length < 12 || formData.rfc.length > 13)) {
+                setError('El RFC debe tener 12 o 13 caracteres');
+                return false;
             }
 
-            // Validar código postal (si se proporciona)
-            if (formData.codigoPostal && formData.codigoPostal.length !== 5) {
+            // Validar código postal (requerido en registro)
+            if (!formData.codigoPostal || formData.codigoPostal.length !== 5) {
                 setError('El código postal debe tener exactamente 5 dígitos');
+                return false;
+            }
+
+            // Validar régimen fiscal
+            if (!formData.regimenFiscal || formData.regimenFiscal.trim().length === 0) {
+                setError('El régimen fiscal es obligatorio');
                 return false;
             }
         }
@@ -249,16 +261,18 @@ const ProveedorLogin = () => {
         }
 
         try {
+            // Hash contraseña en cliente para evitar mostrarla en texto plano
+            const hashed = await sha256Base64(formData.contrasena || '');
             let resp;
             if (isLogin) {
                 resp = await authAPI.proveedorLogin({
                     correo: formData.correo,
-                    contrasena: formData.contrasena
+                    contrasena: hashed
                 });
             } else {
                 resp = await authAPI.proveedorRegistro({
                     correo: formData.correo,
-                    contrasena: formData.contrasena,
+                    contrasena: hashed,
                     nombre: formData.nombre.trim(),
                     apellido: formData.apellido.trim(),
                     rfc: formData.rfc || null,
@@ -270,7 +284,7 @@ const ProveedorLogin = () => {
 
             if (resp.success) {
                 localStorage.setItem('proveedor', JSON.stringify(resp.data));
-                navigate('/proveedor/dashboard');
+                navigate(`/e/${encryptRoute('/proveedor/dashboard')}`);
             } else {
                 setError(resp.message || 'Error en la operación');
             }
@@ -505,7 +519,7 @@ const ProveedorLogin = () => {
                             {isLogin ? 'Regístrate' : 'Inicia sesión'}
                         </button>
                     </p>
-                    <Link to="/" className="back-link">← Volver al inicio</Link>
+                    <Link to={`/e/${encryptRoute('/')}`} className="back-link">← Volver al inicio</Link>
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { encryptRoute } from '../utils/routeCipher';
 import { ordenesAPI, facturasAPI } from '../services/api';
 import './HistorialOrdenes.css';
 
@@ -14,14 +15,14 @@ const HistorialOrdenes = () => {
         try {
             const clienteData = localStorage.getItem('cliente');
             if (!clienteData) {
-                navigate('/login/cliente');
+                navigate(`/e/${encryptRoute('/login/cliente')}`);
                 return;
             }
 
             const parsedCliente = JSON.parse(clienteData);
             if (!parsedCliente || !parsedCliente.clienteId) {
                 localStorage.removeItem('cliente');
-                navigate('/login/cliente');
+                navigate(`/e/${encryptRoute('/login/cliente')}`);
                 return;
             }
 
@@ -29,7 +30,7 @@ const HistorialOrdenes = () => {
         } catch (error) {
             console.error('Error parsing cliente data:', error);
             localStorage.removeItem('cliente');
-            navigate('/login/cliente');
+            navigate(`/e/${encryptRoute('/login/cliente')}`);
         }
     }, [navigate]);
 
@@ -87,7 +88,7 @@ const HistorialOrdenes = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('cliente');
-        navigate('/');
+        navigate(`/e/${encryptRoute('/')}`);
     };
 
     const scrollToTop = () => {
@@ -107,14 +108,14 @@ const HistorialOrdenes = () => {
             <header className="historial-header">
                 <div className="header-content">
                     <div className="header-left">
-                        <Link to="/" className="logo">POS-ting</Link>
+                        <Link to={`/e/${encryptRoute('/')}`} className="logo">POS-ting</Link>
                     </div>
 
                     <div className="header-actions">
-                        <Link to="/productos" className="btn btn-secondary">
+                        <Link to={`/e/${encryptRoute('/productos')}`} className="btn btn-secondary">
                             ← Continuar Comprando
                         </Link>
-                        <Link to="/cesta" className="btn btn-secondary">
+                        <Link to={`/e/${encryptRoute('/cesta')}`} className="btn btn-secondary">
                             🛒 Ver Cesta
                         </Link>
                         <button onClick={handleLogout} className="btn btn-danger">
@@ -141,7 +142,7 @@ const HistorialOrdenes = () => {
                         <div className="no-orders-icon">📋</div>
                         <h2>No tienes órdenes aún</h2>
                         <p>Realiza tu primera compra para ver tu historial aquí</p>
-                        <Link to="/productos" className="btn btn-primary">
+                        <Link to={`/e/${encryptRoute('/productos')}`} className="btn btn-primary">
                             Ver Productos
                         </Link>
                     </div>
@@ -230,7 +231,7 @@ const HistorialOrdenes = () => {
                         <h3 className="footer-title">Enlaces Rápidos</h3>
                         <ul className="footer-links">
                             <li><button onClick={scrollToTop} className="footer-link">Inicio</button></li>
-                            <li><Link to="/productos" className="footer-link">Menú</Link></li>
+                            <li><Link to={`/e/${encryptRoute('/productos')}`} className="footer-link">Menú</Link></li>
                         </ul>
                     </div>
 

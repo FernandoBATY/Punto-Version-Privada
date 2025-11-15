@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { encryptRoute } from '../utils/routeCipher';
 import { productosAPI, categoriasAPI, tiposProductoAPI } from '../services/api';
+import { onlyLetters, onlyNumbers } from '../utils/validators';
 import './GestionProductos.css';
 
 const GestionProductos = () => {
@@ -29,14 +31,14 @@ const GestionProductos = () => {
         try {
             const proveedorData = localStorage.getItem('proveedor');
             if (!proveedorData) {
-                navigate('/login/proveedor');
+                navigate(`/e/${encryptRoute('/login/proveedor')}`);
                 return;
             }
 
             const parsedProveedor = JSON.parse(proveedorData);
             if (!parsedProveedor || !parsedProveedor.proveedorId) {
                 localStorage.removeItem('proveedor');
-                navigate('/login/proveedor');
+                navigate(`/e/${encryptRoute('/login/proveedor')}`);
                 return;
             }
 
@@ -44,7 +46,7 @@ const GestionProductos = () => {
         } catch (error) {
             console.error('Error parsing proveedor data:', error);
             localStorage.removeItem('proveedor');
-            navigate('/login/proveedor');
+            navigate(`/e/${encryptRoute('/login/proveedor')}`);
         }
     }, [navigate]);
 
@@ -76,9 +78,37 @@ const GestionProductos = () => {
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
+        let processedValue = value;
+
+        // Aplicar validadores según el tipo de campo
+        switch (name) {
+            case 'nombre':
+                // Solo letras, números y espacios (máx 150)
+                processedValue = value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 150);
+                break;
+
+            case 'precio':
+                // Solo números y punto decimal
+                processedValue = value.replace(/[^0-9.]/g, '');
+                // Evitar múltiples puntos decimales
+                const parts = processedValue.split('.');
+                if (parts.length > 2) {
+                    processedValue = parts[0] + '.' + parts.slice(1).join('');
+                }
+                break;
+
+            case 'stock':
+                // Solo números enteros positivos
+                processedValue = onlyNumbers(value, 10);
+                break;
+
+            default:
+                processedValue = type === 'checkbox' ? checked : value;
+        }
+
         setFormData({
             ...formData,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: processedValue
         });
     };
 
@@ -189,7 +219,7 @@ const GestionProductos = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('proveedor');
-        navigate('/');
+        navigate(`/e/${encryptRoute('/')}`);
     };
 
     const handleCancel = () => {
@@ -216,7 +246,7 @@ const GestionProductos = () => {
             <header className="productos-header">
                 <div className="header-content">
                     <div className="header-left">
-                        <Link to="/" className="logo">POS-ting</Link>
+                        <Link to={`/e/${encryptRoute('/')}`} className="logo">POS-ting</Link>
                     </div>
 
                     <div className="header-actions">
@@ -480,7 +510,7 @@ const GestionProductos = () => {
                         <h3 className="footer-title">Enlaces Rápidos</h3>
                         <ul className="footer-links">
                             <li><button onClick={scrollToTop} className="footer-link">Inicio</button></li>
-                            <li><Link to="/productos" className="footer-link">Menú</Link></li>
+                            <li><Link to={`/e/${encryptRoute('/productos')}`} className="footer-link">Menú</Link></li>
                         </ul>
                     </div>
 

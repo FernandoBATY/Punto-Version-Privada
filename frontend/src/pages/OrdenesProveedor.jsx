@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { encryptRoute } from '../utils/routeCipher';
 import { dashboardAPI, facturasAPI } from '../services/api';
 import './OrdenesProveedor.css';
 
@@ -16,14 +17,14 @@ const OrdenesProveedor = () => {
     try {
       const proveedorData = localStorage.getItem('proveedor');
       if (!proveedorData) {
-        navigate('/login/proveedor');
+        navigate(`/e/${encryptRoute('/login/proveedor')}`);
         return;
       }
       
       const parsedProveedor = JSON.parse(proveedorData);
       if (!parsedProveedor || !parsedProveedor.proveedorId) {
         localStorage.removeItem('proveedor');
-        navigate('/login/proveedor');
+        navigate(`/e/${encryptRoute('/login/proveedor')}`);
         return;
       }
       
@@ -31,7 +32,7 @@ const OrdenesProveedor = () => {
     } catch (error) {
       console.error('Error parsing proveedor data:', error);
       localStorage.removeItem('proveedor');
-      navigate('/login/proveedor');
+      navigate(`/e/${encryptRoute('/login/proveedor')}`);
     }
   }, [navigate]);
 
@@ -99,7 +100,7 @@ const OrdenesProveedor = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('proveedor');
-    navigate('/');
+    navigate(`/e/${encryptRoute('/')}`);
   };
 
   return (
@@ -107,7 +108,7 @@ const OrdenesProveedor = () => {
       <header className="ordenes-header">
         <h1>📋 Órdenes Recibidas</h1>
         <div className="header-actions">
-          <Link to="/proveedor/dashboard" className="btn btn-secondary">
+          <Link to={`/e/${encryptRoute('/proveedor/dashboard')}`} className="btn btn-secondary">
             ← Dashboard
           </Link>
           <button onClick={handleLogout} className="btn btn-danger">

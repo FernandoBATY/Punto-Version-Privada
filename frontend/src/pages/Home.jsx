@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { encryptRoute } from '../utils/routeCipher';
 import './Home.css';
 
 const Home = () => {
@@ -28,16 +29,16 @@ const Home = () => {
 
                     <nav className="nav-links">
                         <button onClick={scrollToTop} className="nav-link nav-button">Inicio</button>
-                        <Link to="/productos" className="nav-link">Menú</Link>
+                        <Link to={`/e/${encryptRoute('/productos')}`} className="nav-link">Menú</Link>
                         <button onClick={scrollToContact} className="nav-link nav-button">Contacto</button>
                     </nav>
 
                     <div className="nav-actions">
                        
-                        <Link to="/login/cliente" className="btn-login">
+                        <Link to={`/e/${encryptRoute('/login/cliente')}`} className="btn-login">
                             Iniciar Sesión
                         </Link>
-                        <Link to="/login/proveedor" className="btn-dashboard">
+                        <Link to={`/e/${encryptRoute('/login/proveedor')}`} className="btn-dashboard">
                             Acceder Dashboard
                         </Link>
                     </div>
@@ -56,10 +57,10 @@ const Home = () => {
                         y entregada directamente a tu puerta
                     </p>
                     <div className="hero-buttons">
-                        <Link to="/productos" className="btn-hero btn-primary-hero">
+                        <Link to={`/e/${encryptRoute('/productos')}`} className="btn-hero btn-primary-hero">
                             Ver Menú
                         </Link>
-                        <Link to="/productos" className="btn-hero btn-secondary-hero">
+                        <Link to={`/e/${encryptRoute('/productos')}`} className="btn-hero btn-secondary-hero">
                             Ordenar Ahora
                         </Link>
                     </div>
@@ -131,7 +132,7 @@ const Home = () => {
                         <h3 className="footer-title">Enlaces Rápidos</h3>
                         <ul className="footer-links">
                             <li><button onClick={scrollToTop} className="footer-link">Inicio</button></li>
-                            <li><Link to="/productos" className="footer-link">Menú</Link></li>
+                            <li><Link to={`/e/${encryptRoute('/productos')}`} className="footer-link">Menú</Link></li>
                           
                         </ul>
                     </div>

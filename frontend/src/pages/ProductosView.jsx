@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { encryptRoute } from '../utils/routeCipher';
 import { productosAPI, categoriasAPI, tiposProductoAPI, cestaAPI } from '../services/api';
 import './ProductosView.css';
 
@@ -78,7 +79,7 @@ const ProductosView = () => {
     const handleAddToCart = async (producto) => {
         if (!cliente) {
             alert('Debes iniciar sesión para agregar productos al carrito');
-            navigate('/login/cliente');
+            navigate(`/e/${encryptRoute('/login/cliente')}`);
             return;
         }
 
@@ -98,16 +99,16 @@ const ProductosView = () => {
     const handleHistorialAccess = () => {
         if (!cliente) {
             alert('Debes iniciar sesión para ver tu historial de compras');
-            navigate('/login/cliente');
+            navigate(`/e/${encryptRoute('/login/cliente')}`);
             return;
         }
-        navigate('/historial');
+        navigate(`/e/${encryptRoute('/historial')}`);
     };
 
     const handleLogout = () => {
         localStorage.removeItem('cliente');
         setCliente(null);
-        navigate('/');
+        navigate(`/e/${encryptRoute('/')}`);
     };
 
     const getImageUrl = (imageUrl) => {
@@ -175,13 +176,13 @@ const ProductosView = () => {
             <header className="productos-header">
                 <div className="header-content">
                     <div className="header-left">
-                        <Link to="/" className="logo">POS-ting</Link>
+                        <Link to={`/e/${encryptRoute('/')}`} className="logo">POS-ting</Link>
                     </div>
 
                     <div className="header-actions">
                         {cliente ? (
                             <>
-                                <Link to="/cesta" className="btn btn-cart">
+                                <Link to={`/e/${encryptRoute('/cesta')}`} className="btn btn-cart">
                                     🛒 Cesta
                                 </Link>
                                 <button onClick={handleHistorialAccess} className="btn btn-historial">
@@ -192,7 +193,7 @@ const ProductosView = () => {
                                 </button>
                             </>
                         ) : (
-                            <Link to="/login/cliente" className="btn btn-login">
+                            <Link to={`/e/${encryptRoute('/login/cliente')}`} className="btn btn-login">
                                 Iniciar Sesión
                             </Link>
                         )}

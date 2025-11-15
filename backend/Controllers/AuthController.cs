@@ -31,10 +31,13 @@ namespace PuntoVenta.Controllers
                     return BadRequest(new { message = "El correo ya está registrado" });
                 }
 
+                // Si el cliente ya envía la contraseña como SHA256 Base64, almacenarla tal cual.
+                var contrasenaAlmacenada = IsBase64Sha256(request.Contrasena) ? request.Contrasena : HashPassword(request.Contrasena);
+
                 var cliente = new Cliente
                 {
                     Correo = request.Correo,
-                    Contrasena = HashPassword(request.Contrasena),
+                    Contrasena = contrasenaAlmacenada,
                     Nombre = request.Nombre,
                     Apellido = request.Apellido,
                     RFC = request.RFC,
@@ -102,10 +105,12 @@ namespace PuntoVenta.Controllers
                     return BadRequest(new { message = "El correo ya está registrado" });
                 }
 
+                var contrasenaAlmacenadaProv = IsBase64Sha256(request.Contrasena) ? request.Contrasena : HashPassword(request.Contrasena);
+
                 var proveedor = new Proveedor
                 {
                     Correo = request.Correo,
-                    Contrasena = HashPassword(request.Contrasena),
+                    Contrasena = contrasenaAlmacenadaProv,
                     Nombre = request.Nombre,
                     Apellido = request.Apellido,
                     RFC = request.RFC,
@@ -216,7 +221,25 @@ namespace PuntoVenta.Controllers
 
         private bool VerifyPassword(string password, string hashedPassword)
         {
+            // Aceptar tanto: 1) contraseña en claro (hasharla y comparar) como
+            // 2) contraseña ya hasheada por el cliente (comparar directo)
+            if (string.IsNullOrEmpty(password) || string.IsNullOrEmpty(hashedPassword)) return false;
+            if (password == hashedPassword) return true;
             return HashPassword(password) == hashedPassword;
+        }
+
+        private bool IsBase64Sha256(string candidate)
+        {
+            if (string.IsNullOrEmpty(candidate)) return false;
+            try
+            {
+                var bytes = Convert.FromBase64String(candidate);
+                return bytes.Length == 32; // SHA-256 produces 32 bytes
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 

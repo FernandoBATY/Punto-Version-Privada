@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { encryptRoute } from '../utils/routeCipher';
 import { categoriasAPI } from '../services/api';
+import { onlyLetters } from '../utils/validators';
 import './GestionCategorias.css';
 
 const GestionCategorias = () => {
@@ -21,14 +23,14 @@ const GestionCategorias = () => {
         try {
             const proveedorData = localStorage.getItem('proveedor');
             if (!proveedorData) {
-                navigate('/login/proveedor');
+                navigate(`/e/${encryptRoute('/login/proveedor')}`);
                 return;
             }
 
             const parsedProveedor = JSON.parse(proveedorData);
             if (!parsedProveedor || !parsedProveedor.proveedorId) {
                 localStorage.removeItem('proveedor');
-                navigate('/login/proveedor');
+                navigate(`/e/${encryptRoute('/login/proveedor')}`);
                 return;
             }
 
@@ -36,7 +38,7 @@ const GestionCategorias = () => {
         } catch (error) {
             console.error('Error parsing proveedor data:', error);
             localStorage.removeItem('proveedor');
-            navigate('/login/proveedor');
+            navigate(`/e/${encryptRoute('/login/proveedor')}`);
         }
     }, [navigate]);
 
@@ -61,9 +63,27 @@ const GestionCategorias = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        let processedValue = value;
+
+        // Aplicar validadores según el tipo de campo
+        switch (name) {
+            case 'nombre':
+                // Solo letras, números y espacios (máx 100)
+                processedValue = value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 100);
+                break;
+
+            case 'descripcion':
+                // Permitir letras, números, espacios, puntos, comas (máx 500)
+                processedValue = value.slice(0, 500);
+                break;
+
+            default:
+                processedValue = value;
+        }
+
         setFormData({
             ...formData,
-            [name]: value
+            [name]: processedValue
         });
     };
 
@@ -117,7 +137,7 @@ const GestionCategorias = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('proveedor');
-        navigate('/');
+        navigate(`/e/${encryptRoute('/')}`);
     };
 
     const scrollToTop = () => {
@@ -129,7 +149,7 @@ const GestionCategorias = () => {
             <header className="categorias-header">
                 <div className="header-content">
                     <div className="header-left">
-                        <Link to="/" className="logo">POS-ting</Link>
+                        <Link to={`/e/${encryptRoute('/')}`} className="logo">POS-ting</Link>
                     </div>
 
                     <div className="header-actions">
@@ -270,7 +290,7 @@ const GestionCategorias = () => {
                         <h3 className="footer-title">Enlaces Rápidos</h3>
                         <ul className="footer-links">
                             <li><button onClick={scrollToTop} className="footer-link">Inicio</button></li>
-                            <li><Link to="/productos" className="footer-link">Menú</Link></li>
+                            <li><Link to={`/e/${encryptRoute('/productos')}`} className="footer-link">Menú</Link></li>
                         </ul>
                     </div>
 

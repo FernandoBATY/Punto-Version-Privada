@@ -12,6 +12,8 @@ Sistema completo de punto de venta con frontend en React y backend en .NET Core.
 cd frontend
 npm install
 npm install concurrently open --save-dev
+npm install --save-dev javascript-obfuscator
+npm run obfuscate
 ```
 
 ### 2. Instalar dependencias del backend:

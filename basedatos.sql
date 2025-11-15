@@ -99,7 +99,7 @@ CREATE TABLE Pagos (
     FechaCreacion DATETIME2(3) DEFAULT SYSUTCDATETIME()
 );
 CREATE TABLE Facturas (
-    FacturaId INT NOT NULL PRIMARY KEY,
+    FacturaId INT IDENTITY(1,1) PRIMARY KEY,
     OrdenId INT NOT NULL REFERENCES Ordenes(OrdenId) UNIQUE,
     NumeroFactura NVARCHAR(100) NOT NULL UNIQUE,
     UUID CHAR(36) NOT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE Facturas (
     FacturaXML NVARCHAR(MAX) NULL,
     FechaTimbrado DATETIME2(3) NULL,
     Serie NVARCHAR(10) DEFAULT 'A',
-    Folio INT IDENTITY(1,1) NOT NULL,
+    Folio INT NOT NULL,                      -- 🔹 sin IDENTITY
     LugarExpedicion NVARCHAR(5) NOT NULL,
     MetodoPago CHAR(3) NOT NULL DEFAULT 'PUE',
     FormaPago CHAR(2) NOT NULL DEFAULT '03'

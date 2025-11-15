@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { encryptRoute } from '../utils/routeCipher';
 import { cestaAPI, ordenesAPI, pagosAPI, facturasAPI } from '../services/api';
 import './CestaView.css';
 
@@ -29,14 +30,14 @@ const CestaView = () => {
         try {
             const clienteData = localStorage.getItem('cliente');
             if (!clienteData) {
-                navigate('/login/cliente');
+                navigate(`/e/${encryptRoute('/login/cliente')}`);
                 return;
             }
 
             const parsedCliente = JSON.parse(clienteData);
             if (!parsedCliente || !parsedCliente.clienteId) {
                 localStorage.removeItem('cliente');
-                navigate('/login/cliente');
+                navigate(`/e/${encryptRoute('/login/cliente')}`);
                 return;
             }
 
@@ -44,7 +45,7 @@ const CestaView = () => {
         } catch (error) {
             console.error('Error parsing cliente data:', error);
             localStorage.removeItem('cliente');
-            navigate('/login/cliente');
+            navigate(`/e/${encryptRoute('/login/cliente')}`);
         }
     }, [navigate]);
 
@@ -273,7 +274,7 @@ const CestaView = () => {
             }
 
             alert('Pago procesado y facturas generadas exitosamente');
-            navigate('/historial');
+            navigate(`/e/${encryptRoute('/historial')}`);
         } catch (err) {
             alert('Error al procesar el pago');
         }
@@ -286,7 +287,7 @@ const CestaView = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('cliente');
-        navigate('/');
+        navigate(`/e/${encryptRoute('/')}`);
     };
 
     const scrollToTop = () => {
@@ -299,11 +300,11 @@ const CestaView = () => {
                 <header className="cesta-header">
                     <div className="header-content">
                         <div className="header-left">
-                            <Link to="/" className="logo">POS-ting</Link>
+                            <Link to={`/e/${encryptRoute('/')}`} className="logo">POS-ting</Link>
                         </div>
 
                         <div className="header-actions">
-                            <Link to="/productos" className="btn btn-primary">
+                            <Link to={`/e/${encryptRoute('/productos')}`} className="btn btn-primary">
                                 ← Continuar Comprando
                             </Link>
                             <button onClick={handleLogout} className="btn btn-danger">
@@ -327,7 +328,7 @@ const CestaView = () => {
                         <div className="empty-cart-icon">🛒</div>
                         <h2>Tu cesta está vacía</h2>
                         <p>Agrega algunos productos para comenzar tu compra</p>
-                        <Link to="/productos" className="btn btn-primary">
+                        <Link to={`/e/${encryptRoute('/productos')}`} className="btn btn-primary">
                             Ver Productos
                         </Link>
                     </div>
@@ -350,7 +351,7 @@ const CestaView = () => {
                             <h3 className="footer-title">Enlaces Rápidos</h3>
                             <ul className="footer-links">
                                 <li><button onClick={scrollToTop} className="footer-link">Inicio</button></li>
-                                <li><Link to="/productos" className="footer-link">Menú</Link></li>
+                                <li><Link to={`/e/${encryptRoute('/productos')}`} className="footer-link">Menú</Link></li>
                             </ul>
                         </div>
 
@@ -393,11 +394,11 @@ const CestaView = () => {
             <header className="cesta-header">
                 <div className="header-content">
                     <div className="header-left">
-                        <Link to="/" className="logo">POS-ting</Link>
+                        <Link to={`/e/${encryptRoute('/')}`} className="logo">POS-ting</Link>
                     </div>
 
                     <div className="header-actions">
-                        <Link to="/productos" className="btn btn-secondary">
+                        <Link to={`/e/${encryptRoute('/productos')}`} className="btn btn-secondary">
                             ← Continuar Comprando
                         </Link>
                         <button onClick={handleClearCart} className="btn btn-danger">
@@ -606,7 +607,7 @@ const CestaView = () => {
                         <h3 className="footer-title">Enlaces Rápidos</h3>
                         <ul className="footer-links">
                             <li><button onClick={scrollToTop} className="footer-link">Inicio</button></li>
-                            <li><Link to="/productos" className="footer-link">Menú</Link></li>
+                            <li><Link to={`/e/${encryptRoute('/productos')}`} className="footer-link">Menú</Link></li>
                         </ul>
                     </div>
 
