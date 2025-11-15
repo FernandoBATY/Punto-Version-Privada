@@ -1,5 +1,3 @@
-// Simple XOR-based reversible obfuscation for route tokens.
-// NOTE: For production use, replace with proper server-backed encryption.
 const defaultKey = (process.env.REACT_APP_ROUTE_KEY || 'default_key');
 
 function toUint8Array(str) {
@@ -39,7 +37,6 @@ export function encryptRoute(path) {
 export function decryptRoute(token) {
   if (!token) return '';
   const safe = token.replace(/-/g,'+').replace(/_/g,'/');
-  // pad base64
   const pad = safe.length % 4 === 0 ? '' : '='.repeat(4 - (safe.length % 4));
   const decoded = b64Decode(safe + pad);
   return xorCipher(decoded, defaultKey);

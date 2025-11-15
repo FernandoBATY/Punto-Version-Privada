@@ -9,7 +9,6 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          {/* Root stays accessible. All other links use encoded tokens under /e/:token */}
           <Route path="/" element={<Home />} />
           <Route path="/e/:token" element={<EncodedRouter />} />
           <Route path="*" element={<Navigate to="/" replace />} />

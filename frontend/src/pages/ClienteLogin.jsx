@@ -27,26 +27,21 @@ const ClienteLogin = () => {
         const { name, value } = e.target;
         let processedValue = value;
 
-        // Aplicar validadores según el tipo de campo
         switch (name) {
             case 'nombre':
             case 'apellido':
-                // Solo letras y espacios (máx 100)
                 processedValue = onlyLetters(value, 100);
                 break;
 
             case 'telefono':
-                // Solo números (máx 10)
                 processedValue = onlyNumbers(value, 10);
                 break;
 
             case 'rfc':
-                // Solo letras y números, mayúsculas (máx 13)
                 processedValue = onlyAlphanumeric(value, 13).toUpperCase();
                 break;
 
             case 'codigoPostal':
-                // Solo números (máx 5)
                 processedValue = onlyNumbers(value, 5);
                 break;
 
@@ -61,7 +56,6 @@ const ClienteLogin = () => {
     };
 
     const validateForm = () => {
-        // Validar correo (siempre requerido)
         if (!formData.correo.trim()) {
             setError('El correo es requerido');
             return false;
@@ -71,14 +65,12 @@ const ClienteLogin = () => {
             return false;
         }
 
-        // Validar contraseña (siempre requerida)
         if (!formData.contrasena) {
             setError('La contraseña es requerida');
             return false;
         }
 
         if (!isLogin) {
-            // En registro, validar campos adicionales obligatorios
             if (formData.nombre.trim().length < 2) {
                 setError('El nombre debe tener al menos 2 caracteres');
                 return false;
@@ -89,25 +81,21 @@ const ClienteLogin = () => {
                 return false;
             }
 
-            // Teléfono: si se proporciona, debe tener exactamente 10 dígitos
             if (formData.telefono && formData.telefono.length !== 10) {
                 setError('El teléfono debe tener exactamente 10 dígitos');
                 return false;
             }
 
-            // RFC: si se proporciona, debe tener 12 o 13 caracteres
             if (formData.rfc && (formData.rfc.length < 12 || formData.rfc.length > 13)) {
                 setError('El RFC debe tener 12 o 13 caracteres');
                 return false;
             }
 
-            // Código postal: si se proporciona, debe tener exactamente 5 dígitos
             if (formData.codigoPostal && formData.codigoPostal.length !== 5) {
                 setError('El código postal debe tener exactamente 5 dígitos');
                 return false;
             }
 
-            // Régimen fiscal obligatorio en registro
             if (!formData.regimenFiscal) {
                 setError('Debes seleccionar un régimen fiscal');
                 return false;
@@ -122,14 +110,12 @@ const ClienteLogin = () => {
         setLoading(true);
         setError('');
 
-        // Validar formulario antes de enviar
         if (!validateForm()) {
             setLoading(false);
             return;
         }
 
         try {
-            // Hash contraseña en cliente para que no aparezca en texto plano en Network
             const hashed = await sha256Base64(formData.contrasena || '');
             let resp;
             if (isLogin) {

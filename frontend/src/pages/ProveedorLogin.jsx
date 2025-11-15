@@ -141,26 +141,21 @@ const ProveedorLogin = () => {
         const { name, value } = e.target;
         let processedValue = value;
 
-        // Aplicar validadores según el tipo de campo
         switch (name) {
             case 'nombre':
             case 'apellido':
-                // Solo letras y espacios (máx 100)
                 processedValue = onlyLetters(value, 100);
                 break;
 
             case 'telefono':
-                // Solo números (máx 10)
                 processedValue = onlyNumbers(value, 10);
                 break;
 
             case 'rfc':
-                // Solo letras y números, mayúsculas (máx 13)
                 processedValue = onlyAlphanumeric(value, 13).toUpperCase();
                 break;
 
             case 'codigoPostal':
-                // Solo números (máx 5)
                 processedValue = onlyNumbers(value, 5);
                 break;
 
@@ -173,7 +168,6 @@ const ProveedorLogin = () => {
             [name]: processedValue
         });
 
-        // Validar en tiempo real para correo y contraseña
         if (name === 'correo') {
             const emailValidation = validateEmail(processedValue);
             setValidation(prev => ({
@@ -184,52 +178,43 @@ const ProveedorLogin = () => {
     };
 
     const validateForm = () => {
-        // Validar correo en todos los casos (login y registro)
         const emailValid = validateEmail(formData.correo);
         if (!emailValid) {
             setError('Por favor ingresa un correo válido');
             return false;
         }
 
-        // Validar contraseña en todos los casos (login y registro)
         if (!formData.contrasena || formData.contrasena.trim().length === 0) {
             setError('La contraseña es obligatoria');
             return false;
         }
 
         if (!isLogin) {
-            // REGISTRO: Validaciones adicionales
-            // Validar nombre
             if (!formData.nombre || formData.nombre.trim().length < 2) {
                 setError('El nombre debe tener al menos 2 caracteres');
                 return false;
             }
 
-            // Validar apellido
             if (!formData.apellido || formData.apellido.trim().length < 2) {
                 setError('El apellido debe tener al menos 2 caracteres');
                 return false;
             }
 
-            // Validar teléfono (requerido en registro)
             if (!formData.telefono || formData.telefono.length !== 10) {
                 setError('El teléfono debe tener exactamente 10 dígitos');
                 return false;
             }
 
-            // Validar RFC (requerido en registro)
             if (!formData.rfc || (formData.rfc.length < 12 || formData.rfc.length > 13)) {
                 setError('El RFC debe tener 12 o 13 caracteres');
                 return false;
             }
 
-            // Validar código postal (requerido en registro)
             if (!formData.codigoPostal || formData.codigoPostal.length !== 5) {
                 setError('El código postal debe tener exactamente 5 dígitos');
                 return false;
             }
 
-            // Validar régimen fiscal
             if (!formData.regimenFiscal || formData.regimenFiscal.trim().length === 0) {
                 setError('El régimen fiscal es obligatorio');
                 return false;
@@ -254,14 +239,12 @@ const ProveedorLogin = () => {
             return;
         }
 
-        // Validar formulario adicional para registro
         if (!validateForm()) {
             setLoading(false);
             return;
         }
 
         try {
-            // Hash contraseña en cliente para evitar mostrarla en texto plano
             const hashed = await sha256Base64(formData.contrasena || '');
             let resp;
             if (isLogin) {

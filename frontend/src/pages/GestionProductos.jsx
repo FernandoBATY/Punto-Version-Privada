@@ -80,17 +80,13 @@ const GestionProductos = () => {
         const { name, value, type, checked } = e.target;
         let processedValue = value;
 
-        // Aplicar validadores según el tipo de campo
         switch (name) {
             case 'nombre':
-                // Solo letras, números y espacios (máx 150)
                 processedValue = value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 150);
                 break;
 
             case 'precio':
-                // Solo números y punto decimal
                 processedValue = value.replace(/[^0-9.]/g, '');
-                // Evitar múltiples puntos decimales
                 const parts = processedValue.split('.');
                 if (parts.length > 2) {
                     processedValue = parts[0] + '.' + parts.slice(1).join('');
@@ -98,7 +94,6 @@ const GestionProductos = () => {
                 break;
 
             case 'stock':
-                // Solo números enteros positivos
                 processedValue = onlyNumbers(value, 10);
                 break;
 

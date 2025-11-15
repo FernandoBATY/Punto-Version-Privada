@@ -334,7 +334,6 @@ const CestaView = () => {
                     </div>
                 </div>
 
-                {/* Footer */}
                 <footer className="footer">
                     <div className="footer-container">
                         <div className="footer-column">
@@ -371,7 +370,6 @@ const CestaView = () => {
                     </div>
                 </footer>
 
-                {/* Botón de WhatsApp flotante */}
                 <a
                     href="https://wa.me/5217292974595"
                     target="_blank"
@@ -590,7 +588,6 @@ const CestaView = () => {
                 </div>
             )}
 
-            {/* Footer */}
             <footer className="footer">
                 <div className="footer-container">
                     <div className="footer-column">
@@ -627,7 +624,6 @@ const CestaView = () => {
                 </div>
             </footer>
 
-            {/* Botón de WhatsApp flotante */}
             <a
                 href="https://wa.me/5217292974595"
                 target="_blank"

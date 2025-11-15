@@ -65,15 +65,12 @@ const GestionCategorias = () => {
         const { name, value } = e.target;
         let processedValue = value;
 
-        // Aplicar validadores según el tipo de campo
         switch (name) {
             case 'nombre':
-                // Solo letras, números y espacios (máx 100)
                 processedValue = value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 100);
                 break;
 
             case 'descripcion':
-                // Permitir letras, números, espacios, puntos, comas (máx 500)
                 processedValue = value.slice(0, 500);
                 break;
 
