@@ -1,0 +1,11 @@
+﻿{
+    "Logging":  {
+                    "LogLevel":  {
+                                     "Default":  "Information",
+                                     "Microsoft.EntityFrameworkCore":  "Information"
+                                 }
+                },
+    "ConnectionStrings":  {
+                              "DefaultConnection":  "Server=tcp:sql-puntoventa-davi123.database.windows.net,1433;Initial Catalog=sql-puntoventa-davi123;Persist Security Info=False;User ID=sqladmin1;Password=Hola2003%;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+                          }
+}

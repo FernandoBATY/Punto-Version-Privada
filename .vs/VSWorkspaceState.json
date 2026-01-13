@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\backend",
+    "\\backend\\Controllers",
+    "\\backend\\Data",
+    "\\backend\\Models",
+    "\\frontend",
+    "\\frontend\\src",
+    "\\frontend\\src\\pages",
+    "\\frontend\\src\\services"
+  ],
+  "SelectedNode": "\\frontend\\src\\pages\\ProveedorLogin.jsx",
+  "PreviewInSolutionExplorer": false
+}
